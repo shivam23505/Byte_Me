@@ -1,0 +1,672 @@
+import java.sql.SQLOutput;
+import java.util.*;
+import java.util.function.DoubleToIntFunction;
+
+public class Main {
+    private static List<List<Course>>AllCourses = new ArrayList<>();
+    private static List<Student>AllStudents = new ArrayList<>();
+    private static List<Professor>AllProfessors = new ArrayList<>();
+    private static List<Admin>AllAdmins = new ArrayList<>();
+    private static List<Complaint>AllComplaints = new ArrayList<>();
+    private static List<TeachingAssistant>TeachingAssistants = new ArrayList<>();
+    private static boolean ADD_DROP_deadline = true;
+    public static Course checkCourse(Scanner scanner) {
+        System.out.print("Enter the course code:");
+        String courseCode = scanner.next();
+        scanner.nextLine();
+        Course new_course = null;
+        for (List<Course>entry:AllCourses){
+            for (Course c:entry){
+                if (c.getCourseCode().equals(courseCode)){
+                    new_course = c;
+                    break;
+                }
+            }
+        }
+        return new_course;
+    }
+    public static Student checkStudent(Scanner scanner) {
+        System.out.print("Enter the student roll number:");
+        String roll = scanner.next();
+        Student new_student = null;
+        for (Student s:AllStudents){
+            if (s.getRollNo().equals(roll)){
+                new_student = s;
+                break;
+            }
+        }
+        return new_student;
+    }
+    public static Professor checkProfessor(Scanner scanner) {
+        System.out.print("Enter the professor ID:");
+        String professorID = scanner.next();
+        Professor new_professor = null;
+        for (Professor p:AllProfessors){
+            if (p.getProfessorID().equals(professorID)){
+                new_professor = p;
+                break;
+            }
+        }
+        return new_professor;
+    }
+    public static TeachingAssistant CheckTA(String email, String password) throws InvalidLoginException{
+        TeachingAssistant a = null;
+        for (TeachingAssistant t:TeachingAssistants){
+            if (t.getEmail().equals(email) && t.getPassword().equals(password)){
+                a = t;
+                break;
+            }
+        }
+        if (a == null){
+            throw new InvalidLoginException("Invalid login!!");
+        }
+        return a;
+    }
+
+    public static void main(String[] args) {
+        for(int i=0;i<8;i++){
+            AllCourses.add(new ArrayList<>());
+        }
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
+        while (running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("########### Welcome to the University Course Registration System ###########");
+            System.out.println("1.Login as student");
+            System.out.println("2.Login as Professor");
+            System.out.println("3.Login as Teaching Assistant");
+            System.out.println("4.Login as administrator");
+            System.out.println("5.Exit the application");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter the choice:");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1) {
+                StudentLogin(scanner);
+            } else if (choice == 2) {
+                ProfessorLogin(scanner);
+            } else if (choice == 3) {
+                TALogin(scanner);
+            } else if (choice == 4) {
+                AdminLogin(scanner);
+            } else if (choice == 5) {
+                System.out.println("Thank you for using the application!!");
+                running = false;
+            } else {
+                System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    public static Student StudentSignup(Scanner scanner){
+        System.out.print("Enter your email:");
+        String email = scanner.nextLine();
+        System.out.print("Enter your password:");
+        String password = scanner.nextLine();
+        System.out.print("Enter your Roll NO:");
+        String rollNo = scanner.nextLine();
+        System.out.print("Enter your semester:");
+        int semester = scanner.nextInt();
+        for(Student s:AllStudents){
+            if (s.getRollNo().equals(rollNo)){
+                System.out.println("Invalid Details. Roll No already exists!!");
+                return null;
+            }
+        }
+        Student student = new TeachingAssistant(email, password, rollNo, semester);
+        AllStudents.add(student);
+        return student;
+    }
+    public static Student checkStudentLogin(String email,String password) throws InvalidLoginException{
+        for (Student s:AllStudents){
+            if (s.getEmail().equals(email) && s.getPassword().equals(password)){
+                return s;
+            }
+        }
+        throw new InvalidLoginException("Invalid login!!");
+    }
+    public static void StudentLogin(Scanner scanner) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("1.Student Signup");
+            System.out.println("2.Student login");
+            System.out.println("3.Go Back");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter the choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1) {
+                Student new_student = StudentSignup(scanner);
+                if(new_student == null){continue;}
+                System.out.println("Student " + new_student.getRollNo() + " successfully signed in!!");
+                studentMenu(scanner,new_student);
+                running=false;
+            } else if (choice == 3) {
+                running = false;
+            } else if (choice == 2) {
+                System.out.print("Enter your email:");
+                String email = scanner.nextLine();
+                System.out.print("Enter your password:");
+                String password = scanner.nextLine();
+                try{
+                    Student curr_student = checkStudentLogin(email,password);
+                    curr_student.login(email,password);
+                    studentMenu(scanner,curr_student);
+                    running=false;
+                }
+                catch(InvalidLoginException e){
+                    System.out.println(e.getMessage());
+                }
+
+            }
+        }
+    }
+    public static void studentMenu(Scanner scanner,Student curr_student) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("####  Student Menu  ####");
+            System.out.println("1.View Available Courses in Current Semester");
+            System.out.println("2.View Course Details");
+            System.out.println("3.Register for Courses");
+            System.out.println("4.View My Courses");
+            System.out.println("5.View My Schedule");
+            System.out.println("6.Drop A Course");
+            System.out.println("7.View CGPA");
+            System.out.println("8.Submit Complaint");
+            System.out.println("9.View My Grades");
+            System.out.println("10.View Complaint Status");
+            System.out.println("11.View Previous completed courses");
+            System.out.println("12.Give Course Feedback");
+            System.out.println("13.Logout");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1) {
+                int sem = curr_student.getSemester();
+                curr_student.viewAvailable_Courses(AllCourses.get(sem-1));
+            }
+            else if (choice == 2){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                }
+                else{
+                    curr_student.viewCourseDetails(curr_course);
+                }
+            }
+            else if (choice == 3){
+                if (curr_student.getCreditLimit() == 20){
+                    System.out.println("Already Registered for courses. Credit Limit is at 20");
+                    System.out.println("Drop A course to register another one.");
+                    continue;
+                }
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                }
+                else{
+                    try{
+                        curr_student.RegisterCourses(AllCourses.get(curr_student.getSemester()-1), curr_course,ADD_DROP_deadline);
+                    }
+                    catch (CourseFullException | DropDeadlinePassedException e){
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+            else if (choice == 4){
+                curr_student.viewMyCourses();
+            }
+            else if (choice == 5){
+                curr_student.viewSchedule();
+            }
+            else if (choice == 6){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                    continue;
+                }
+                try {
+                    curr_student.DropCourse(curr_course, ADD_DROP_deadline);
+                }
+                catch (DropDeadlinePassedException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+            else if (choice == 7){
+                int ans = curr_student.CalculateSgpa();
+                curr_student.calculateCgpa(ans);
+            }
+            else if (choice == 8){
+                //handle complaints
+                System.out.println("Select the type of complaint");
+                System.out.println("1.Course Clash");
+                System.out.println("2.Other");
+                System.out.print("Enter your choice:");
+                int choice1 = scanner.nextInt();
+                scanner.nextLine();
+                int ID = AllComplaints.size();
+                Complaint new_complaint = null;
+                if (choice1 == 2){
+                    new_complaint = curr_student.SubmitOtherComplaint(scanner,ID,1);
+                }
+                else{
+                    new_complaint = curr_student.SubmitClashComplaint(scanner,ID,2,AllCourses);
+                }
+                AllComplaints.addLast(new_complaint);
+                System.out.println("Complaint Registered successfully!!");
+                System.out.println("Complaint ID:" + ID);
+            }
+            else if (choice == 9){
+                curr_student.viewMyGrades();
+            }
+            else if (choice == 10){
+                curr_student.viewComplaintStatus(scanner);
+            }
+            else if (choice == 11){
+                curr_student.viewCoursesArchive();
+            }
+            else if (choice == 12){
+                curr_student.ProvideFeedback(scanner);
+            }
+            else if (choice == 13){
+                running = false;
+                curr_student.logout();
+            }
+            else{
+                System.out.println("Invalid choice!!");
+            }
+        }
+    }
+    public static Professor ProfSignup(Scanner scanner){
+        System.out.print("Enter your name:");
+        String name = scanner.nextLine();
+        System.out.print("Enter your ProfID:");
+        String profID = scanner.nextLine();
+        System.out.print("Enter your email:");
+        String email = scanner.nextLine();
+        System.out.print("Enter your password:");
+        String password = scanner.nextLine();
+        for (Professor p : AllProfessors){
+            if (p.getProfessorID().equals(profID)) {
+                System.out.println("Invalid Details. The profID already exists!");
+                return null;
+            }
+        }
+        Professor new_prof = new Professor(email,password,profID,name);
+        AllProfessors.add(new_prof);
+        return new_prof;
+    }
+    public static Professor checkProfLogin(String email, String password) throws InvalidLoginException{
+        for (Professor p : AllProfessors){
+            if (p.getEmail().equals(email) && p.getPassword().equals(password)){
+                return p;
+            }
+        }
+        throw new InvalidLoginException("Invalid Login!");
+    }
+    public static void ProfessorLogin(Scanner scanner) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("1.Professor Signup");
+            System.out.println("2.Professor Login");
+            System.out.println("3.Go back");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                Professor prof = ProfSignup(scanner);
+                if (prof == null) {continue;}
+                System.out.println(prof.getProfessorID() + "Successfully signed in!!");
+                ProfessorMenu(scanner,prof);
+                running = false;
+            }
+            else if (choice == 3){
+                running = false;
+            }
+            else if (choice == 2){
+                System.out.print("Enter your email:");
+                String email = scanner.nextLine();
+                System.out.print("Enter your password:");
+                String password = scanner.nextLine();
+                try {
+                    Professor prof = checkProfLogin(email, password);
+                    ProfessorMenu(scanner,prof);
+                    running = false;
+                }
+                catch (InvalidLoginException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+    }
+    public static void ProfessorMenu(Scanner scanner, Professor curr_prof) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("####  Professor Menu  ####");
+            System.out.println("1.View Course Details");
+            System.out.println("2.Update Course Details");
+            System.out.println("3.View My Schedule");
+            System.out.println("4.View Enrolled Students");
+            System.out.println("5.View Course Feedback");
+            System.out.println("6.Logout");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                    continue;
+                }
+                int ans  = curr_prof.viewCourseDetails(curr_course);
+                if (ans==1){
+                    System.out.println("YOU ARE NOT THE PROFESSOR OF THIS COURSE!!");
+                    System.out.println("Course details are:");
+                    curr_course.printMyDetails();
+                }
+            }
+            else if (choice == 2){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                    continue;
+                }
+                System.out.println("Select feature to update:");
+                System.out.println("1.Credits");
+                System.out.println("2.Prerequisites");
+                System.out.print("Enter your choice:");
+                int choice2 = scanner.nextInt();
+                scanner.nextLine();
+                String[] temp = {"Credits","Prerequisites"};
+                curr_prof.UpdateCourseDetails(AllCourses.get(curr_course.getSemester()-1),curr_course,temp[choice2-1],scanner);
+            }
+            else if (choice == 3){
+                curr_prof.viewSchedule();
+            }
+            else if (choice == 4){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                    continue;
+                }
+                curr_prof.ViewEnrolledStudents(curr_course);
+            }
+            else if (choice == 5){
+                curr_prof.view_feedback(scanner);
+            }
+            else if (choice == 6){
+                curr_prof.logout();
+                running = false;
+            }
+            else{
+                System.out.println("Invalid choice!!");
+            }
+        }
+    }
+
+    public static void TALogin(Scanner scanner){
+        System.out.print("Enter your email:");
+        String email = scanner.nextLine();
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+        try{
+            TeachingAssistant currTa = CheckTA(email,password);
+            TA_Menu(currTa,scanner);
+        }
+        catch (InvalidLoginException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    public static void TA_Menu(TeachingAssistant currTa,Scanner scanner){
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("#### TA MENU ####");
+            System.out.println("1.View Assigned Courses");
+            System.out.println("2.Assign Student Grades");
+            System.out.println("3.Logout");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                currTa.viewAssignedCourses();
+            }
+            else if (choice == 2){
+                currTa.assignStudentGrade(scanner,AllStudents);
+            }
+            else if (choice == 3){
+                currTa.logout();
+                running = false;
+            }
+            else{
+                System.out.println("Invalid choice!!");
+            }
+        }
+    }
+    public static Admin AdminSignup(Scanner scanner) {
+        System.out.print("Enter your email:");
+        String email = scanner.nextLine();
+        System.out.print("Enter the AdminID:");
+        String adminID = scanner.nextLine();
+        System.out.print("Enter ADMIN password:");
+        String password = scanner.nextLine();
+        for (Admin admin:AllAdmins){
+            if (admin.getAdminID().equals(adminID)){
+                return null;
+            }
+        }
+        if (!Objects.equals(password, "ADMIN123")) {
+            return null;
+        }
+        Admin new_admin = new Admin(email, adminID, password);
+        AllAdmins.add(new_admin);
+        return new_admin;
+    }
+    public static Admin checkAdminLogin(String email, String password) throws InvalidLoginException{
+        for (Admin admin:AllAdmins){
+            if (admin.getEmail().equals(email) && admin.getPassword().equals(password)){
+                return admin;
+            }
+        }
+        throw new InvalidLoginException("INVALID LOGIN!!");
+    }
+    public static void AdminLogin(Scanner scanner) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("1.Admin Signup");
+            System.out.println("2.Admin Login");
+            System.out.println("3.Go back");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                Admin new_admin = AdminSignup(scanner);
+                if (new_admin == null) {
+                    System.out.println("Invalid Login Details!!");
+                }
+                else{
+                    System.out.println(new_admin.getAdminID() + "has successfully logged in!!");
+                    AdminMenu(scanner, new_admin);
+                    running = false;
+                }
+            }
+            else if (choice == 2){
+                System.out.print("Enter your email:");
+                String email = scanner.nextLine();
+                System.out.print("Enter your password:");
+                String password = scanner.nextLine();
+                try{
+                    Admin admin = checkAdminLogin(email,password);
+                    admin.login(email,password);
+                    AdminMenu(scanner, admin);
+                    running = false;
+                }
+                catch (InvalidLoginException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+            else if (choice == 3){
+                running = false;
+            }
+            else{
+                System.out.println("Invalid choice!!");
+            }
+        }
+    }
+
+    public static void AdminMenu(Scanner scanner, Admin curr_admin) {
+        boolean running = true;
+        while(running) {
+            System.out.println("-------------------------------------------------");
+            System.out.println("#### ADMIN MENU ####");
+            System.out.println("1.Add Course");
+            System.out.println("2.View Course Details");
+            System.out.println("3.Delete Course");
+            System.out.println("4.View Student Record");
+            System.out.println("5.Assign Grade to student");
+            System.out.println("6.Update Student grade");
+            System.out.println("7.Assign Professor to course");
+            System.out.println("8.Manage Prof Timings");
+            System.out.println("9.Manage Course Timings");
+            System.out.println("10.Handle Complaints");
+            System.out.println("11.Assign Classrooms");
+            System.out.println("12.Make Teaching Assistant");
+            System.out.println("13.MANAGE ADD_DROP DEADLINE");
+            System.out.println("14.Logout");
+            System.out.println("-------------------------------------------------");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                curr_admin.AddCourses(AllCourses,scanner);
+            }
+            else if (choice == 2){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                }
+                else {
+                    curr_admin.viewCourseDetails(curr_course);
+                }
+            }
+            else if (choice == 3){
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");
+                }
+                else {
+                    curr_admin.DeleteCourse(AllCourses,curr_course);
+                }
+            }
+            else if (choice == 4){
+                Student student  = checkStudent(scanner);
+                if (student == null){
+                    System.out.println("Invalid student roll number!!");continue;
+                }
+                curr_admin.ViewStudentRecord(student,AllStudents);
+            }
+            else if (choice == 5 || choice == 6){
+                Student student = checkStudent(scanner);
+                if (student == null){
+                    System.out.println("Invalid student roll number!!");continue;
+                }
+                Course curr_course = checkCourse(scanner);
+                if (curr_course == null) {
+                    System.out.println("Invalid course code!!");continue;
+                }
+                System.out.print("Enter the grade:");
+                String new_grade = scanner.nextLine();
+                if (choice==5){
+                    curr_admin.AssignStudentGrade(student,curr_course,new_grade);
+                }
+                else{
+                    curr_admin.UpdateStudentGrade(student,new_grade,curr_course);
+                }
+            }
+            else if (choice == 7){
+                Course course = checkCourse(scanner);
+                if (course == null){
+                    System.out.println("Invalid course code!!");continue;
+                }
+                Professor prof = checkProfessor(scanner);
+                if (prof == null){
+                    System.out.println("Invalid professor ID!!");continue;
+                }
+                curr_admin.AssignProfessors(prof,course);
+                System.out.println("Successfully Assigned " + course.getCourseCode() + " to prof "+prof.getProfessorName());
+            }
+            else if (choice == 8){
+                Professor prof = checkProfessor(scanner);
+                if (prof == null){
+                    System.out.println("Invalid professor ID!!");continue;
+                }
+                curr_admin.Manageproftimings(prof);
+            }
+            else if (choice == 9){
+                Course course  = checkCourse(scanner);
+                if (course == null){
+                    System.out.println("Invalid course code!!");continue;
+                }
+                curr_admin.ManageCourseTimings(course);
+            }
+            else if (choice == 10){
+                //handle complaints
+                System.out.println("1.Clash Complaints");
+                System.out.println("2.Other Complaints");
+                System.out.print("Enter the choice:");
+                int c = scanner.nextInt();
+                scanner.nextLine();
+                curr_admin.HandleOtherComplaints(AllComplaints,scanner);
+            }
+            else if (choice == 11){
+                Course course = checkCourse(scanner);
+                if (course == null){
+                    System.out.println("Invalid course code!!");continue;
+                }
+                System.out.print("Enter the classroom:");
+                String location = scanner.nextLine();
+                course.setlocation(location);
+                System.out.println("Successfully updated classroom!!");
+            }
+            else if (choice == 12) {
+                TeachingAssistant newTa = curr_admin.MakeTA(scanner, AllStudents, AllCourses);
+                if (newTa!=null) {
+                    TeachingAssistants.addLast(newTa);
+                    System.out.println("Successfully added new TEACHING ASSISTANT!!");
+                }
+            }
+            else if (choice == 13){
+                System.out.println("ENTER 1 to close the add-drop deadline");
+                System.out.println("ENTER 2 to open the deadline");
+                System.out.print("Your choice:");
+                int choice1 = scanner.nextInt();
+                if (choice1==1){
+                    ADD_DROP_deadline = false;
+                    System.out.println("ADD-DROP DEADLINE CLOSED!!");
+                }
+                else if (choice1==2){
+                    ADD_DROP_deadline = true;
+                    System.out.println("ADD-DROP DEADLINE OPENED!!");
+                }
+            }
+            else if (choice == 14){
+                curr_admin.logout();
+                running = false;
+            }
+            else{
+                System.out.println("Invalid Choice!!");
+            }
+        }
+    }
+}
