@@ -4,18 +4,20 @@ import java.util.*;
 
 public class Customer extends User{
     private List<Order> MyOrders;
-    private int CustomerID;
+    private String CustomerID;
     private Cart MyCart;
     private boolean isVIP;
 
-    public Customer(String name, String address, String phone,int CustomerID,String email, String password,boolean isVIP) {
+    public Customer(String name, String address, String phone,String CustomerID,String email, String password,boolean isVIP) {
         super(name,phone,address,email,password);
         this.CustomerID = CustomerID;
-        MyCart = new Cart();
+        MyCart = new Cart(getCustomerID(),(isVIP?"VIP":"REGULAR"),this);
         this.isVIP = isVIP;
         MyOrders = new ArrayList<Order>();
     }
-
+    public void addOrder(Order order){
+        MyOrders.add(order);
+    }
     public List<Order> getMyOrders() {
         return MyOrders;
     }
@@ -24,7 +26,7 @@ public class Customer extends User{
         MyOrders = orderHistory;
     }
 
-    public boolean isVIP() {
+    public boolean getVIP() {
         return isVIP;
     }
 
@@ -32,10 +34,10 @@ public class Customer extends User{
         isVIP = VIP;
     }
 
-    public int getCustomerID() {
+    public String getCustomerID() {
         return CustomerID;
     }
-    public void setCustomerID(int CustomerID) {
+    public void setCustomerID(String CustomerID) {
         this.CustomerID = CustomerID;
     }
     public Cart getMyCart() {
@@ -47,7 +49,7 @@ public class Customer extends User{
     public boolean CartEmpty(){
         return MyCart == null;
     }
-    public void BrowseMenu(Scanner scanner, Map<FoodItem,Integer> Menu){
+    public void BrowseMenu(Scanner scanner, TreeSet<FoodItem> Menu){
         boolean running = true;
         while(running){
             System.out.println("1.View All Items");
@@ -78,32 +80,32 @@ public class Customer extends User{
             }
         }
     }
-    public void viewAllItems(Map<FoodItem,Integer> Menu){
-        System.out.println("Item\tQuantity\tPrice");
-        for (FoodItem item : Menu.keySet()) {
-            System.out.println(item.getName() + "\t" + Menu.get(item) + "\t" + item.getPrice());
+    public void viewAllItems(TreeSet<FoodItem> menu) {
+        System.out.println("ItemId\tItem\tQuantity\tPrice");
+        for (FoodItem item : menu) {
+            System.out.println(item.getId() + "\t" + item.getName() + "\t" + item.getQuantity() + "\t" + item.getPrice());
         }
     }
 
-    public  void searchItem(Map<FoodItem,Integer> Menu, Scanner scanner){
+    public  void searchItem(TreeSet<FoodItem> Menu, Scanner scanner){
         System.out.print("ENTER THE KEYWORD TO SEARCH:");
         String keyword = scanner.nextLine();
-        System.out.println("Item\tQuantity\tPrice");
+        System.out.println("ItemId\tItem\tQuantity\tPrice");
         boolean ok = false;
-        for (FoodItem item : Menu.keySet()) {
+        for (FoodItem item : Menu) {
             if (item.getName().toLowerCase().contains(keyword.toLowerCase()) ||
             item.getCategory().toLowerCase().contains(keyword.toLowerCase())) {
                 ok = true;
-                System.out.println(item.getName() + "\t" + Menu.get(item) + "\t" + item.getPrice());
+                System.out.println(item.getId() + "\t" + item.getName() + "\t" + item.getQuantity() + "\t" + item.getPrice());
             }
         }
         if (!ok){
             System.out.println("No Item Found!!");
         }
     }
-    public void filterByCategory(Map<FoodItem,Integer> Menu){
+    public void filterByCategory(TreeSet<FoodItem> Menu){
         Map<String,List<FoodItem>>Categories = new HashMap<>();
-        for (FoodItem item : Menu.keySet()) {
+        for (FoodItem item : Menu) {
             if (Categories.containsKey(item.getCategory())) {
                 Categories.get(item.getCategory()).add(item);
             }
@@ -116,12 +118,12 @@ public class Customer extends User{
         for (Map.Entry<String,List<FoodItem>> entry : Categories.entrySet()) {
             System.out.println("Category:" + entry.getKey());
             for (FoodItem item : entry.getValue()) {
-                System.out.println("Name:" + item.getName() + "\tPrice:" + item.getPrice());
+                System.out.println("ID:" + item.getId() + "\tName:" + item.getName() + "\tPrice:" + item.getPrice());
             }
             System.out.println();
         }
     }
-    public void sortItems(Map<FoodItem,Integer> Menu, Scanner scanner){
+    public void sortItems(TreeSet<FoodItem> Menu, Scanner scanner){
         System.out.println("Enter 1 to sort in ascending order by price");
         System.out.println("Enter 2 to sort in descending order by price");
         System.out.print("Enter the choice:");
@@ -131,28 +133,64 @@ public class Customer extends User{
             System.out.println("INVALID INPUT!!");
             return;
         }
-        Map<FoodItem,Integer> currMenu = new HashMap<>(Menu);
-        List<Map.Entry<FoodItem, Integer>> entryList = new ArrayList<>(currMenu.entrySet());
+        Comparator<FoodItem> AsecPriceComparator = new Comparator<>() {
+            @Override
+            public int compare(FoodItem entry1,FoodItem entry2) {
+                return Double.compare(entry1.getPrice(), entry2.getPrice());
+            }
+        };
 
-        entryList.sort((entry1, entry2) -> {
-            Double price1 = entry1.getKey().getPrice();
-            Double price2 = entry2.getKey().getPrice();
-            return ((choice == 1)?price1.compareTo(price2):price2.compareTo(price1));
-        });
-        Map<FoodItem, Integer> sortedMenu = new LinkedHashMap<>();
-        for (Map.Entry<FoodItem, Integer> entry : entryList) {
-            sortedMenu.put(entry.getKey(), entry.getValue());
+        Comparator<FoodItem> DescPriceComparator = new Comparator<>() {
+            @Override
+            public int compare(FoodItem entry1,FoodItem entry2) {
+                return Double.compare(entry2.getPrice(), entry1.getPrice());
+            }
+        };
+
+        TreeSet<FoodItem>sortedMenu;
+        if (choice == 1){
+            sortedMenu = new TreeSet<>(AsecPriceComparator);
         }
+        else{
+            sortedMenu = new TreeSet<>(DescPriceComparator);
+        }
+        sortedMenu.addAll(Menu);
         viewAllItems(sortedMenu);
     }
-
-//    public void CartFunctions(){};
-    public void OrderTracking(Scanner scanner,int orderID){
+    public void PLACE_ORDER(Scanner scanner,int orderId,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers){
+        getMyCart().CartOperations(scanner,menu,orderId,AllOrders,AllCustomers);
+    }
+    public void ObtainMembership(Scanner scanner){
+        if (getVIP()){
+            System.out.println("YOU ARE ALREADY A VIP MEMBER!!");
+            return;
+        }
+        boolean running = true;
+        while(running){
+            System.out.println("VIP MEMBERSHIP COST:5000");
+            System.out.println("1.Obtain Membership");
+            System.out.println("2.Exit");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                System.out.println("CONGRATULATIONS!! YOU ARE NOW A VIP MEMBER!!");
+                setVIP(true);
+            }
+            else if (choice == 2){
+                running = false;
+            }
+            else{
+                System.out.println("INVALID INPUT!!");
+            }
+        }
+    }
+    public void OrderTracking(Scanner scanner,int orderID,List<Order>CancelledOrders){
         boolean running = true;
         while(running) {
             System.out.println("1.View Order Status");
             System.out.println("2.Cancel My Order");
-            System.out.println("3.View Order History");
+            System.out.println("3.View My Previous Orders");
             System.out.println("4.Go Back");
             System.out.print("Enter the choice");
             int choice = scanner.nextInt();
@@ -160,7 +198,7 @@ public class Customer extends User{
             if (choice == 1) {
                 viewStatus(scanner);
             } else if (choice == 2) {
-                cancelOrder(scanner);
+                cancelOrder(scanner,CancelledOrders);
             } else if (choice == 3) {
                 viewHistory();
             }
@@ -193,7 +231,7 @@ public class Customer extends User{
             System.out.println("INVALID ID!! ORDER NOT FOUND!!");
         }
     }
-    public void cancelOrder(Scanner scanner){
+    public void cancelOrder(Scanner scanner,List<Order>CancelledOrder){
         System.out.print("Enter the OrderId:");
         int x = scanner.nextInt();
         scanner.nextLine();
@@ -214,6 +252,7 @@ public class Customer extends User{
                 temp.setCancelled(true);
                 System.out.println("Order is Cancelled!!");
                 System.out.println("Refund Process has begin!! Please visit the site regularly to get updates!!");
+                CancelledOrder.add(temp);
             }
         }
         else{
@@ -227,7 +266,6 @@ public class Customer extends User{
             System.out.println("---");
         }
     }
-
     public void Checkout(){};
 
     public void login(){

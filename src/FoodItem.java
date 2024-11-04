@@ -1,16 +1,18 @@
+import java.util.Scanner;
+
 public class FoodItem {
     private int id;
     private String name;
     private String category;
     private double price;
-    private int available;
+    private int quantity;
 
-    public FoodItem(int id, String name, String category, double price, int available) {
+    public FoodItem(int id, String name, String category, double price, int quantity) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.price = price;
-        this.available = available;
+        this.quantity = quantity;
     }
     public int getId() {
         return id;
@@ -36,15 +38,66 @@ public class FoodItem {
     public void setPrice(double price) {
         this.price = price;
     }
-    public int isAvailable() {
-        return available;
+
+    public int getQuantity() {
+        return quantity;
     }
-    public void setAvailable(int available) {
-        this.available = available;
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    public void updateDetails(Scanner scanner){
+        boolean running = true;
+        while(running){
+            System.out.println("1.UPDATE PRICE");
+            System.out.println("2.UPDATE QUANTITY");
+            System.out.println("3.UPDATE CATEGORY");
+            System.out.println("4.EXIT");
+            System.out.print("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1){
+                System.out.print("Enter the new price:");
+                double newPrice = scanner.nextDouble();
+                scanner.nextLine();
+                setPrice(newPrice);
+            }
+            else if (choice == 2){
+                System.out.print("Enter the new quantity:");
+                int newQuantity = scanner.nextInt();
+                scanner.nextLine();
+                setQuantity(newQuantity);
+            }
+            else if (choice == 3){
+                System.out.print("Enter the new category:");
+                String newCategory = scanner.nextLine();
+                setCategory(newCategory);
+            }
+            else if (choice == 4){
+                running = false;
+            }
+            else{
+                System.out.println("Invalid choice");
+            }
+        }
+        System.out.println("DETAILS UPDATED SUCCESSFULLY!!!");
     }
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        FoodItem foodItem = (FoodItem) obj;
+        return getId() == foodItem.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(getId()) ;
+    }
+
+    @Override
     public String toString() {
-        return id + ": " + name + " (" + category + ") - $" + price + (available>0 ? " [Available]" : " [Unavailable]");
+        return id + ": " + name + " (" + category + ") - $" + price + (getQuantity()>0 ? " [Available]" : " [Unavailable]");
     }
 
 }

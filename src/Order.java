@@ -9,7 +9,7 @@ import java.util.Map;
     DENIED
     CANCELED
  */
-public class Order {
+public class Order implements Comparable<Order> {
     private int OrderId;
     private Map<FoodItem,Integer>order;
     private String CustomerID;
@@ -30,8 +30,36 @@ public class Order {
         this.SpecialRequirements_status = SpecialRequirements_status;
         isCancelled = false;
     }
+    public Order(String customerId,String CustomerType){
+        order = new HashMap<>();
+        this.CustomerID = customerId;
+        this.CustomerType = CustomerType;
+    }
+    public Order(Order other){
+        this.order = other.getOrder();
+        this.OrderId = other.getOrderId();
+        this.CustomerID = other.getCustomerID();
+        this.CustomerType = other.getCustomerType();
+        this.SpecialRequirements = other.getSpecialRequirements();
+        this.SpecialRequirements_status = other.getSpecialRequirements_status();
+        this.Status = other.getStatus();
+        isCancelled = other.getCancelled();
+    }
 
-    public boolean isCancelled() {
+    public void clear(){
+        order.clear();
+        setOrderId(-1);
+        setSpecialRequirements(null);
+        setSpecialRequirements_status(null);
+        setStatus(null);
+    }
+    public void addItemInOrder(FoodItem fooditem, int quantity){
+        order.put(fooditem,quantity);
+    }
+    public void removeItemFromOrder(FoodItem fooditem){
+        order.remove(fooditem);
+    }
+    public boolean getCancelled() {
         return isCancelled;
     }
 
@@ -54,7 +82,6 @@ public class Order {
     public void setOrderId(int orderID) {
         OrderId = orderID;
     }
-
     public Map< FoodItem,Integer> getOrder() {
         return order;
     }
@@ -98,9 +125,18 @@ public class Order {
     public String toString() {
         return getOrderId()+ "("+getCustomerType() + " ORDER) Status:" + getStatus();
     }
+
+    @Override
+    public int compareTo(Order other) {
+        if (this.getCustomerType().equals("VIP") && !other.getCustomerType().equals("VIP")) return -1;
+        if (!this.getCustomerType().equals("VIP") && other.getCustomerType().equals("VIP")) return 1;
+        return Integer.compare(this.getOrderId(), other.getOrderId()); // Otherwise, compare by orderId
+    }
+
     public void OrderDetails(){
         for (FoodItem item : getOrder().keySet()) {
-            System.out.println("Item:" + item.getName() + "\tQuantity:" + getOrder().get(item));
+            System.out.println("ItemId:" + item.getId() + "\tItem:" + item.getName() + "\tQuantity:" + getOrder().get(item));
         }
     }
+
 }

@@ -2,6 +2,23 @@ import java.sql.SQLOutput;
 import java.util.*;
 import java.util.function.DoubleToIntFunction;
 
+
+
+//        Map<FoodItem,Integer> currMenu = new HashMap<>(Menu);
+//        List<Map.Entry<FoodItem, Integer>> entryList = new ArrayList<>(currMenu.entrySet());
+//
+//        entryList.sort((entry1, entry2) -> {
+//            Double price1 = entry1.getKey().getPrice();
+//            Double price2 = entry2.getKey().getPrice();
+//            return ((choice == 1)?price1.compareTo(price2):price2.compareTo(price1));
+//        });
+//        Map<FoodItem, Integer> sortedMenu = new LinkedHashMap<>();
+//        for (Map.Entry<FoodItem, Integer> entry : entryList) {
+//            sortedMenu.put(entry.getKey(), entry.getValue());
+//        }
+//        viewAllItems(sortedMenu);
+
+
 public class Main {
     private static List<List<Course>>AllCourses = new ArrayList<>();
     private static List<Student>AllStudents = new ArrayList<>();
