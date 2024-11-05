@@ -6,7 +6,7 @@ public class Cart {
     private Order curr_order;
     private String status;
 
-    public Cart(String CustomerId, String CustomerType,Customer myCustomer) {
+    public Cart(int CustomerId, String CustomerType,Customer myCustomer) {
         curr_order = new Order(CustomerId, CustomerType);
         status = "EMPTY";
         this.myCustomer = myCustomer;
@@ -38,7 +38,7 @@ public class Cart {
         }
         return curr_item;
     }
-    public void CartOperations(Scanner scanner, TreeSet<FoodItem>menu, int newOrderID,List<Order>AllOrders,List<Customer>allCustomers) {
+    public void CartOperations(Scanner scanner, TreeSet<FoodItem>menu, int newOrderID,List<Order>AllOrders,List<Customer>allCustomers,PriorityQueue<Order>PendingOrders) {
         boolean running = true;
         while(running){
             System.out.println("1.ADD ITEM TO CART");
@@ -63,7 +63,7 @@ public class Cart {
                 viewCart();
             }
             else if (choice == 5){
-                checkoutProcess(scanner,AllOrders,allCustomers);
+                checkoutProcess(scanner,AllOrders,allCustomers,PendingOrders);
             }
             else if (choice == 6){
                 running = false;
@@ -88,6 +88,7 @@ public class Cart {
             System.out.println("Quantity exceeds current availability!! Please Reduce the quantity");
             return;
         }
+        curr_item.setQuantity(curr_item.getQuantity()-quantity);
         curr_order.addItemInOrder(curr_item, quantity);
         curr_order.setOrderId(newOrderID);
 //        curr_order.setStatus("RECEIVED");
@@ -101,7 +102,8 @@ public class Cart {
             System.out.println("Invalid ID! Item not found!");return;
         }
         System.out.println("Item selected:" + curr_item.getName());
-        curr_order.removeItemFromOrder(curr_item);
+        int x = curr_order.removeItemFromOrder(curr_item);
+        curr_item.setQuantity(curr_item.getQuantity() + x);
         System.out.println("SUCCESSFULLY REMOVED ITEM FROM CART!!!");
     }
     public void updateOrder(Scanner scanner, TreeSet<FoodItem>menu) {
@@ -126,6 +128,7 @@ public class Cart {
                 System.out.println("Quantity exceeds current availability!! Please Reduce the quantity");return;
             }
             curr_order.addItemInOrder(curr_item, x);
+            curr_item.setQuantity(curr_item.getQuantity()-x);
             System.out.println("SUCCESSFULLY UPDATED ITEM FROM CART!!!");
         }
         else if (choice == 2){
@@ -141,7 +144,7 @@ public class Cart {
     public void viewCart(){
         curr_order.OrderDetails();
     }
-    public void checkoutProcess(Scanner scanner, List<Order> AllOrders,List<Customer>allCustomers) {
+    public void checkoutProcess(Scanner scanner, List<Order> AllOrders,List<Customer>allCustomers,PriorityQueue<Order>PendingOrders) {
         double total = 0;
         for (FoodItem item:curr_order.getOrder().keySet()){
             total += item.getPrice() * curr_order.getOrder().get(item);
@@ -163,6 +166,7 @@ public class Cart {
                 System.out.println("PAYMENT MADE SUCCESSFULLY!!");
                 Order new_order = new Order(curr_order);
                 AllOrders.addLast(new_order);
+                PendingOrders.add(new_order);
                 new_order.setStatus("ORDER RECEIVED");
                 getMyCustomer().addOrder(new_order);
                 curr_order.clear();

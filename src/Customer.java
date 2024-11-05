@@ -4,11 +4,11 @@ import java.util.*;
 
 public class Customer extends User{
     private List<Order> MyOrders;
-    private String CustomerID;
+    private int CustomerID;
     private Cart MyCart;
     private boolean isVIP;
 
-    public Customer(String name, String address, String phone,String CustomerID,String email, String password,boolean isVIP) {
+    public Customer(String name, String address, String phone,int CustomerID,String email, String password,boolean isVIP) {
         super(name,phone,address,email,password);
         this.CustomerID = CustomerID;
         MyCart = new Cart(getCustomerID(),(isVIP?"VIP":"REGULAR"),this);
@@ -34,10 +34,10 @@ public class Customer extends User{
         isVIP = VIP;
     }
 
-    public String getCustomerID() {
+    public int getCustomerID() {
         return CustomerID;
     }
-    public void setCustomerID(String CustomerID) {
+    public void setCustomerID(int CustomerID) {
         this.CustomerID = CustomerID;
     }
     public Cart getMyCart() {
@@ -81,7 +81,11 @@ public class Customer extends User{
         }
     }
     public void viewAllItems(TreeSet<FoodItem> menu) {
-        System.out.println("ItemId\tItem\tQuantity\tPrice");
+        if (menu.isEmpty()){
+            System.out.println("MENU IS EMPTY!!");
+            return;
+        }
+        System.out.println("ItemId\tItem\tQuantity(AVAILABLE)\tPrice");
         for (FoodItem item : menu) {
             System.out.println(item.getId() + "\t" + item.getName() + "\t" + item.getQuantity() + "\t" + item.getPrice());
         }
@@ -157,8 +161,8 @@ public class Customer extends User{
         sortedMenu.addAll(Menu);
         viewAllItems(sortedMenu);
     }
-    public void PLACE_ORDER(Scanner scanner,int orderId,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers){
-        getMyCart().CartOperations(scanner,menu,orderId,AllOrders,AllCustomers);
+    public void PLACE_ORDER(Scanner scanner,int orderId,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers,PriorityQueue<Order>PendingOrder){
+        getMyCart().CartOperations(scanner,menu,orderId,AllOrders,AllCustomers,PendingOrder);
     }
     public void ObtainMembership(Scanner scanner){
         if (getVIP()){
@@ -185,7 +189,7 @@ public class Customer extends User{
             }
         }
     }
-    public void OrderTracking(Scanner scanner,int orderID,List<Order>CancelledOrders){
+    public void OrderTracking(Scanner scanner,List<Order>CancelledOrders){
         boolean running = true;
         while(running) {
             System.out.println("1.View Order Status");

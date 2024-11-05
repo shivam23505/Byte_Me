@@ -12,14 +12,14 @@ import java.util.Map;
 public class Order implements Comparable<Order> {
     private int OrderId;
     private Map<FoodItem,Integer>order;
-    private String CustomerID;
+    private int CustomerID;
     private String CustomerType; // VIP or REGULAR
     private String SpecialRequirements;
     private String SpecialRequirements_status;
     private String Status;
     private boolean isCancelled;
 
-    public Order(int OrderId,Map<FoodItem,Integer> order, String CustomerID, String CustomerType,
+    public Order(int OrderId,Map<FoodItem,Integer> order, int CustomerID, String CustomerType,
                  String SpecialRequirements, String Status,String SpecialRequirements_status) {
         this.order = order;
         this.CustomerID = CustomerID;
@@ -30,7 +30,7 @@ public class Order implements Comparable<Order> {
         this.SpecialRequirements_status = SpecialRequirements_status;
         isCancelled = false;
     }
-    public Order(String customerId,String CustomerType){
+    public Order(int customerId,String CustomerType){
         order = new HashMap<>();
         this.CustomerID = customerId;
         this.CustomerType = CustomerType;
@@ -56,8 +56,10 @@ public class Order implements Comparable<Order> {
     public void addItemInOrder(FoodItem fooditem, int quantity){
         order.put(fooditem,quantity);
     }
-    public void removeItemFromOrder(FoodItem fooditem){
+    public int removeItemFromOrder(FoodItem fooditem){
+        int x = order.get(fooditem);
         order.remove(fooditem);
+        return x;
     }
     public boolean getCancelled() {
         return isCancelled;
@@ -90,11 +92,11 @@ public class Order implements Comparable<Order> {
         this.order = order;
     }
 
-    public String getCustomerID() {
+    public int getCustomerID() {
         return CustomerID;
     }
 
-    public void setCustomerID(String customerID) {
+    public void setCustomerID(int customerID) {
         CustomerID = customerID;
     }
 

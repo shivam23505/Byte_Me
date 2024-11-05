@@ -2,8 +2,8 @@ import java.util.*;
 
 public class Admin extends User{
     private SalesReport salesReport;
-    public Admin(String name, String Phone, String Password,String email,String address) {
-        super(name, Phone, Password, email, address);
+    public Admin(String name, String Phone, String Password,String email) {
+        super(name, Phone, null, email, Password);
         salesReport = new SalesReport();
     }
 
@@ -183,37 +183,85 @@ public class Admin extends User{
         for (Order order : pendingOrders) {
             System.out.print("--");
             System.out.println(order);
+            order.OrderDetails();
             System.out.println();
         }
     }
-    public void updateOrderStatus(int orderId, String status,PriorityQueue<Order> pendingOrders) {
+    public void processOrder(PriorityQueue<Order>PendingOrders){
+        Order top_order = PendingOrders.poll();
+        if (top_order == null){
+            System.out.println("THERE ARE NO PENDING ORDERS CURRENTLY!!!");
+            return;
+        }
+        top_order.setStatus("DELIVERED");
+        System.out.println("ORDER ID:" + top_order.getOrderId() + " has been delivered!!");
+        System.out.println("ORDER DETAILS ARE:");
+        top_order.OrderDetails();
+    }
+
+    public void updateOrderStatus(Scanner scanner,PriorityQueue<Order> pendingOrders) {
+        System.out.print("Enter the order id:");
+        int orderId = scanner.nextInt();
+        scanner.nextLine();
+        System.out.print("Enter the new order status:");
+        String newStatus = scanner.nextLine();
+        boolean found = false;
         for (Order order : pendingOrders) {
             if (order.getOrderId() == orderId) {
-                order.setStatus(status);
-                if (status.equals("DELIVERED")) {
+                found = true;
+                order.setStatus(newStatus);
+                if (newStatus.equals("DELIVERED")) {
                     pendingOrders.remove(order);
                     salesReport.addOrderToReport(order);
                 }
                 break;
             }
         }
+        if (!found){
+            System.out.println("ORDER NOT FOUND");
+            return;
+        }
+        System.out.println("STATUS UPDATED SUCCESSFULLY!!");
     }
-    public void HandleSpecialRequests(int orderId,String status,PriorityQueue<Order> pendingOrders) {
+    public void handleRequests(Scanner scanner, PriorityQueue<Order> pendingOrders) {
+        System.out.print("Enter the order id to handle special request:");
+        int orderId = scanner.nextInt();
+        scanner.nextLine();
+        boolean found = false;
         for (Order order : pendingOrders) {
             if (order.getOrderId() == orderId) {
-                order.setSpecialRequirements_status(status);
+                found = true;
+                order.setSpecialRequirements_status("HANDLED");
+                System.out.println("Special request has been handled for order id:" + orderId);
+                break;
             }
         }
+        if (!found){
+            System.out.println("ORDER NOT FOUND");
+        }
     }
-
-    public void processRefunds(int orderId, List<Order> AllOrders) {
+    public void processRefunds(Scanner scanner, List<Order> AllOrders) {
+        System.out.print("Enter the order id to start process refund:");
+        int orderId = scanner.nextInt();
+        scanner.nextLine();
+        boolean found = false;
         for (Order order : AllOrders) {
             if (order.getOrderId() == orderId) {
                 if (Objects.equals(order.getStatus(), "CANCELLED")){
+                    found = true;
                     salesReport.refundBack(order);
                     break;
                 }
             }
         }
+        if (!found){
+            System.out.println("ORDER NOT FOUND");
+        }
+    }
+    public void login(){
+        System.out.println("Admin "+getName()+" has logged in");
+    }
+    public void reportGenerator(){
+        salesReport.generateReport();
     }
 }
