@@ -52,11 +52,13 @@ public class Customer extends User{
     public void BrowseMenu(Scanner scanner, TreeSet<FoodItem> Menu){
         boolean running = true;
         while(running){
+            System.out.println("-------------------------");
             System.out.println("1.View All Items");
             System.out.println("2.Search");
             System.out.println("3.Filter by Category");
             System.out.println("4.Sort by Price");
-            System.out.println("5.Go Back");
+            System.out.println("5.View Item Review");
+            System.out.println("6.Go Back");
             System.out.print("Enter the Choice:");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -73,6 +75,9 @@ public class Customer extends User{
                 sortItems(Menu,scanner);
             }
             else if (choice == 5){
+                viewItemReview(scanner,Menu);
+            }
+            else if (choice == 6){
                 running = false;
             }
             else{
@@ -161,8 +166,8 @@ public class Customer extends User{
         sortedMenu.addAll(Menu);
         viewAllItems(sortedMenu);
     }
-    public void PLACE_ORDER(Scanner scanner,int orderId,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers,PriorityQueue<Order>PendingOrder){
-        getMyCart().CartOperations(scanner,menu,orderId,AllOrders,AllCustomers,PendingOrder);
+    public void PLACE_ORDER(Scanner scanner,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers,PriorityQueue<Order>PendingOrder){
+        getMyCart().CartOperations(scanner,menu,AllOrders,AllCustomers,PendingOrder);
     }
     public void ObtainMembership(Scanner scanner){
         if (getVIP()){
@@ -171,6 +176,7 @@ public class Customer extends User{
         }
         boolean running = true;
         while(running){
+            System.out.println("-----------------------------");
             System.out.println("VIP MEMBERSHIP COST:5000");
             System.out.println("1.Obtain Membership");
             System.out.println("2.Exit");
@@ -180,6 +186,8 @@ public class Customer extends User{
             if (choice == 1){
                 System.out.println("CONGRATULATIONS!! YOU ARE NOW A VIP MEMBER!!");
                 setVIP(true);
+
+                running = false;
             }
             else if (choice == 2){
                 running = false;
@@ -189,9 +197,10 @@ public class Customer extends User{
             }
         }
     }
-    public void OrderTracking(Scanner scanner,List<Order>CancelledOrders){
+    public void OrderTracking(Scanner scanner,List<Order>CancelledOrders,PriorityQueue<Order>PendingOrders){
         boolean running = true;
         while(running) {
+            System.out.println("-----------------------------");
             System.out.println("1.View Order Status");
             System.out.println("2.Cancel My Order");
             System.out.println("3.View My Previous Orders");
@@ -202,7 +211,7 @@ public class Customer extends User{
             if (choice == 1) {
                 viewStatus(scanner);
             } else if (choice == 2) {
-                cancelOrder(scanner,CancelledOrders);
+                cancelOrder(scanner,CancelledOrders,PendingOrders);
             } else if (choice == 3) {
                 viewHistory();
             }
@@ -235,7 +244,7 @@ public class Customer extends User{
             System.out.println("INVALID ID!! ORDER NOT FOUND!!");
         }
     }
-    public void cancelOrder(Scanner scanner,List<Order>CancelledOrder){
+    public void cancelOrder(Scanner scanner,List<Order>CancelledOrder,PriorityQueue<Order>PendingOrders){
         System.out.print("Enter the OrderId:");
         int x = scanner.nextInt();
         scanner.nextLine();
@@ -248,19 +257,26 @@ public class Customer extends User{
                 break;
             }
         }
-        if (found){
-            if (Objects.equals(temp.getStatus(), "DELIVERED")){
-                System.out.println("CANNOT CANCEL!! ORDER HAS BEEN DELIVERED ALREADY");
-            }
-            else{
-                temp.setCancelled(true);
-                System.out.println("Order is Cancelled!!");
-                System.out.println("Refund Process has begin!! Please visit the site regularly to get updates!!");
-                CancelledOrder.add(temp);
-            }
+        if (!found){
+            System.out.println("INVALID ID!! ORDER NOT FOUND!!");return;
+        }
+        if (Objects.equals(temp.getStatus(), "DELIVERED")){
+            System.out.println("CANNOT CANCEL!! ORDER HAS BEEN DELIVERED ALREADY");
         }
         else{
-            System.out.println("INVALID ID!! ORDER NOT FOUND!!");
+            temp.setCancelled(true);
+            temp.setStatus("CANCELLED");
+            System.out.println("Order is Cancelled!!");
+            System.out.println("Refund Process has begin!! Please visit the site regularly to get updates!!");
+            CancelledOrder.add(temp);
+
+            Iterator<Order> iterator = PendingOrders.iterator();
+            while (iterator.hasNext()) {
+                Order curr = iterator.next();
+                if (curr.getOrderId() == x) {
+                    iterator.remove();
+                }
+            }
         }
     }
     public void viewHistory(){
@@ -270,7 +286,43 @@ public class Customer extends User{
             System.out.println("---");
         }
     }
-    public void Checkout(){};
+    public void viewItemReview(Scanner scanner, TreeSet<FoodItem>Menu){
+        System.out.print("Enter the item id to view review:");
+        int x = scanner.nextInt();
+        scanner.nextLine();
+        FoodItem temp = null;
+        boolean found = false;
+        for (FoodItem f:Menu){
+            if (f.getId() == x){
+                found = true;temp = f;
+                break;
+            }
+        }
+        if (!found){
+            System.out.println("Invalid ID!!");return;
+        }
+        temp.viewMyReview();
+    }
+    public void giveComment(Scanner scanner, TreeSet<FoodItem>Menu){
+        System.out.print("Enter the item id to give review:");
+        int x = scanner.nextInt();
+        scanner.nextLine();
+        FoodItem temp = null;
+        boolean found = false;
+        for (FoodItem f:Menu){
+            if (f.getId() == x){
+                found = true;temp = f;
+                break;
+            }
+        }
+        if (!found){
+            System.out.println("Invalid ID!!");return;
+        }
+        System.out.print("Enter the review:");
+        String comment = scanner.nextLine();
+        temp.addComment(comment);
+        System.out.println("REVIEW ADDED SUCCESSFULLY!!");
+    }
 
     public void login(){
         System.out.println("Customer "+getName()+" has logged in");

@@ -5,11 +5,13 @@ public class Cart {
     private Customer myCustomer;
     private Order curr_order;
     private String status;
+    private boolean payment;
 
     public Cart(int CustomerId, String CustomerType,Customer myCustomer) {
         curr_order = new Order(CustomerId, CustomerType);
         status = "EMPTY";
         this.myCustomer = myCustomer;
+        payment = false;
     }
 
     public String getStatus() {
@@ -38,9 +40,12 @@ public class Cart {
         }
         return curr_item;
     }
-    public void CartOperations(Scanner scanner, TreeSet<FoodItem>menu, int newOrderID,List<Order>AllOrders,List<Customer>allCustomers,PriorityQueue<Order>PendingOrders) {
+    public void CartOperations(Scanner scanner, TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>allCustomers,PriorityQueue<Order>PendingOrders) {
+        curr_order.setCustomerType((myCustomer.getVIP()?"VIP":"REGULAR"));
         boolean running = true;
         while(running){
+            int newOrderID = 10 + AllOrders.size();
+            System.out.println("-----------------------");
             System.out.println("1.ADD ITEM TO CART");
             System.out.println("2.REMOVE ITEM FROM CART");
             System.out.println("3.UPDATE MY ORDER");
@@ -92,10 +97,11 @@ public class Cart {
         curr_order.addItemInOrder(curr_item, quantity);
         curr_order.setOrderId(newOrderID);
 //        curr_order.setStatus("RECEIVED");
-        System.out.println("Order Successfully Added!!");
+        System.out.println("Item Successfully Added!!");
 
     }
     public void removeItem(Scanner scanner,  TreeSet<FoodItem>menu) {
+        System.out.print("ENTER THE ITEM ID TO REMOVE:");
         FoodItem curr_item = checkFunc(scanner, menu);
 
         if (curr_item == null){
@@ -164,13 +170,19 @@ public class Cart {
             }
             else{
                 System.out.println("PAYMENT MADE SUCCESSFULLY!!");
+                curr_order.setStatus("ORDER RECEIVED");
                 Order new_order = new Order(curr_order);
+//                System.out.println("CURRENT CUSTOMER IS :::::" + curr_order.getCustomerType());
                 AllOrders.addLast(new_order);
                 PendingOrders.add(new_order);
-                new_order.setStatus("ORDER RECEIVED");
-                getMyCustomer().addOrder(new_order);
-                curr_order.clear();
                 System.out.println("ORDER PLACED SUCCESSFULLY!!");
+                System.out.println("-----");
+                System.out.println("ORDER ID:" + new_order.getOrderId());
+                System.out.println("------");
+                curr_order.OrderDetails();
+                curr_order.clear();
+                System.out.println("CURRENT STATUS:" + new_order.getStatus());
+                myCustomer.addOrder(new_order);
                 System.out.println("KEEP CHECKING THE SITE TO TRACK YOUR ORDER STATUS!!");
                 System.out.println("THANK YOU!!");
                 break;

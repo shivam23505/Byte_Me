@@ -17,14 +17,14 @@ public class CustomerLogin {
 
     public Customer CustomerSignup(Scanner scanner,List<Customer>AllCustomers){
         System.out.print("Enter your name:");
-        String name = scanner.next();
+        String name = scanner.nextLine();
         System.out.print("Enter your email:");
         String email = scanner.nextLine();
         System.out.print("Enter your password:");
         String password = scanner.nextLine();
         System.out.print("Enter your contact:");
         String phone = scanner.nextLine();
-        System.out.print("Enter your address");
+        System.out.print("Enter your address:");
         String address = scanner.nextLine();
         for(Customer s:AllCustomers){
             if (s.getEmail().equals(email)){
@@ -38,7 +38,7 @@ public class CustomerLogin {
         return customer;
     }
 
-    public void CustomerLogin(Scanner scanner, List<Customer>AllCustomer, TreeSet<FoodItem> Menu,
+    public void loginCustomer(Scanner scanner, List<Customer>AllCustomer, TreeSet<FoodItem> Menu,
                               List<Order>AllOrders, PriorityQueue<Order>PendingOrder,List<Order>CancelledOrders) {
         boolean running = true;
         while(running) {
@@ -79,6 +79,7 @@ public class CustomerLogin {
                              PriorityQueue<Order>PendingOrder,List<Customer>AllCustomers, List<Order>CancelledOrders) {
         boolean running = true;
         while(running) {
+            System.out.println("----------------------");
             System.out.println("1.BROWSE MENU");
             System.out.println("2.ADD A NEW ORDER");
             System.out.println("3.MANAGE MY ORDERS");
@@ -92,16 +93,16 @@ public class CustomerLogin {
                 customer.BrowseMenu(scanner,Menu);
             }
             else if (choice == 2) {
-                customer.PLACE_ORDER(scanner,AllOrders.size(),Menu,AllOrders,AllCustomers,PendingOrder);
+                customer.PLACE_ORDER(scanner,Menu,AllOrders,AllCustomers,PendingOrder);
             }
             else if (choice == 3) {
-                customer.OrderTracking(scanner,CancelledOrders);
+                customer.OrderTracking(scanner,CancelledOrders,PendingOrder);
             }
             else if (choice == 4) {
                 customer.ObtainMembership(scanner);
             }
             else if (choice == 5) {
-                System.out.println("REVIEW SYSTEM");
+                customer.giveComment(scanner,Menu);
             }
             else if (choice == 6) {
                 running = false;

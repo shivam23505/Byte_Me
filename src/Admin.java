@@ -1,3 +1,6 @@
+import com.sun.source.tree.Tree;
+
+import javax.swing.plaf.IconUIResource;
 import java.util.*;
 
 public class Admin extends User{
@@ -29,26 +32,37 @@ public class Admin extends User{
         }
         return foodItem;
     }
-    public void AdminFunctions(Scanner scanner,TreeSet<FoodItem>menu,List<Order>AllOrders,PriorityQueue<Order>PendingOrders){
+
+
+    public void menuManagement(Scanner scanner,TreeSet<FoodItem>menu,PriorityQueue<Order>PendingOrders){
         boolean running = true;
         while(running){
-            System.out.println("1.MENU MANAGEMENT");
-            System.out.println("2.ORDER MANAGEMENT");
-            System.out.println("3.REPORT GENERATION");
-            System.out.println("4.EXIT");
+            System.out.println("----------------------------");
+            System.out.println("1.VIEW MENU");
+            System.out.println("2.ADD NEW ITEMS");
+            System.out.println("3.UPDATE EXISTING ITEMS");
+            System.out.println("4.REMOVE ITEM");
+            System.out.println("5.VIEW ITEM REVIEW");
+            System.out.println("6.EXIT");
             System.out.print("Enter your choice:");
             int x = scanner.nextInt();
             scanner.nextLine();
             if (x==1){
-                menuManagement(scanner,menu,PendingOrders);
+                viewWholeMenu(menu);
             }
-            else if (x==2){
-                OrderManagement(scanner,AllOrders,PendingOrders);
+            else if(x==2){
+                addFoodItem(scanner,menu);
             }
             else if (x==3){
-                reportGenerator();
+                updateFoodItem(scanner,menu);
             }
             else if (x==4){
+                removeFoodItem(scanner,menu,PendingOrders);
+            }
+            else if (x==5){
+                viewItemREVIEW(scanner,menu);
+            }
+            else if (x==6){
                 running = false;
             }
             else{
@@ -56,32 +70,14 @@ public class Admin extends User{
             }
         }
     }
-
-    public void menuManagement(Scanner scanner,TreeSet<FoodItem>menu,PriorityQueue<Order>PendingOrders){
-        boolean running = true;
-        while(running){
-            System.out.println("1.ADD NEW ITEMS");
-            System.out.println("2.UPDATE EXISTING ITEMS");
-            System.out.println("3.REMOVE ITEM");
-            System.out.println("4.EXIT");
-            System.out.print("Enter your choice:");
-            int x = scanner.nextInt();
-            scanner.nextLine();
-            if (x==1){
-                addFoodItem(scanner,menu);
-            }
-            else if (x==2){
-                updateFoodItem(scanner,menu);
-            }
-            else if (x==3){
-                removeFoodItem(scanner,menu,PendingOrders);
-            }
-            else if (x==4){
-                running = false;
-            }
-            else{
-                System.out.println("Invalid choice");
-            }
+    public void viewWholeMenu(TreeSet<FoodItem>menu){
+        if (menu.isEmpty()){
+            System.out.println("MENU IS EMPTY!!");
+            return;
+        }
+        System.out.println("ItemId\tItem\tQuantity(AVAILABLE)\tPrice");
+        for (FoodItem item : menu) {
+            System.out.println(item.getId() + "\t" + item.getName() + "\t" + item.getQuantity() + "\t" + item.getPrice());
         }
     }
     public void addFoodItem(Scanner scanner,TreeSet<FoodItem>menu) {
@@ -139,12 +135,31 @@ public class Admin extends User{
         if (!found){
             System.out.println("ITEM NOT FOUND");return;
         }
+        pendingOrders.removeIf(curr -> Objects.equals(curr.getStatus(), "DENIED"));
         System.out.println("ITEM SUCCESSFULLY REMOVED IN THE MENU!!!");
+    }
+    public void viewItemREVIEW(Scanner scanner,TreeSet<FoodItem>menu) {
+        System.out.print("Enter the item id to view review:");
+        int x = scanner.nextInt();
+        scanner.nextLine();
+        FoodItem temp = null;
+        boolean found = false;
+        for (FoodItem f:menu){
+            if (f.getId() == x){
+                found = true;temp = f;
+                break;
+            }
+        }
+        if (!found){
+            System.out.println("Invalid ID!!");return;
+        }
+        temp.viewMyReview();
     }
 
     public void OrderManagement(Scanner scanner,List<Order>AllOrders,PriorityQueue<Order>PendingOrders) {
         boolean running = true;
         while(running){
+            System.out.println("---------------------------");
             System.out.println("1.VIEW PENDING ORDERS");
             System.out.println("2.PROCESS ORDER");
             System.out.println("3.UPDATE ORDER STATUS");
@@ -180,6 +195,10 @@ public class Admin extends User{
 
     // Order Management
     public void viewPendingOrders(PriorityQueue<Order> pendingOrders) {
+        if (pendingOrders.isEmpty()){
+            System.out.println("NO PENDING ORDERS RIGHT NOW!!");
+            return;
+        }
         for (Order order : pendingOrders) {
             System.out.print("--");
             System.out.println(order);
@@ -197,6 +216,7 @@ public class Admin extends User{
         System.out.println("ORDER ID:" + top_order.getOrderId() + " has been delivered!!");
         System.out.println("ORDER DETAILS ARE:");
         top_order.OrderDetails();
+        salesReport.addOrderToReport(top_order);
     }
 
     public void updateOrderStatus(Scanner scanner,PriorityQueue<Order> pendingOrders) {
@@ -231,7 +251,11 @@ public class Admin extends User{
         for (Order order : pendingOrders) {
             if (order.getOrderId() == orderId) {
                 found = true;
+                if (order.getSpecialRequirements() == null){
+                    System.out.println("THE ORDER DOES NOT HAVE ANY SPECIAL REQUIREMENT!!");return;
+                }
                 order.setSpecialRequirements_status("HANDLED");
+                System.out.println("REQUIREMENT::" + order.getSpecialRequirements());
                 System.out.println("Special request has been handled for order id:" + orderId);
                 break;
             }

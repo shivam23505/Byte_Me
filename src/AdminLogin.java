@@ -1,5 +1,9 @@
+import com.sun.source.tree.Tree;
+
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Scanner;
+import java.util.TreeSet;
 
 public class AdminLogin {
     public Admin checkAdminLogin(String email,String password,List<Admin>AllAdmin) throws InvalidLoginException{
@@ -13,7 +17,7 @@ public class AdminLogin {
 
     public Admin AdminSignup(Scanner scanner,List<Admin>AllAdmins){
         System.out.print("Enter your name:");
-        String name = scanner.next();
+        String name = scanner.nextLine();
         System.out.print("Enter your email:");
         String email = scanner.nextLine();
         System.out.print("Enter your password:");
@@ -31,7 +35,7 @@ public class AdminLogin {
         return admin;
     }
 
-    public void AdminLogin(Scanner scanner,List<Admin>AllAdmin) {
+    public void loginAdmin(Scanner scanner, List<Admin>AllAdmin, TreeSet<FoodItem>Menu,List<Order>AllOrder,PriorityQueue<Order>PendingOrder) {
         boolean running = true;
         while(running) {
             System.out.println("-------------------------------------------------");
@@ -46,7 +50,7 @@ public class AdminLogin {
                 Admin new_admin = AdminSignup(scanner,AllAdmin);
                 if(new_admin == null){continue;}
                 System.out.println("Admin " + new_admin.getEmail() + " successfully signed in!!");
-                AdminMenu(scanner,new_admin);
+                AdminMenu(scanner,new_admin,Menu,AllOrder,PendingOrder);
                 running=false;
             } else if (choice == 3) {
                 running = false;
@@ -58,12 +62,40 @@ public class AdminLogin {
                 try{
                     Admin curr_admin = checkAdminLogin(email,password,AllAdmin);
                     curr_admin.login();
-                    AdminMenu(scanner,curr_admin);
+                    AdminMenu(scanner,curr_admin,Menu,AllOrder,PendingOrder);
                     running=false;
                 }
                 catch(InvalidLoginException e){
                     System.out.println(e.getMessage());
                 }
+            }
+        }
+    }
+    public void AdminMenu(Scanner scanner, Admin admin, TreeSet<FoodItem> menu, List<Order>AllOrders, PriorityQueue<Order> PendingOrders){
+        boolean running = true;
+        while(running){
+            System.out.println("---------------------");
+            System.out.println("1.MENU MANAGEMENT");
+            System.out.println("2.ORDER MANAGEMENT");
+            System.out.println("3.REPORT GENERATION");
+            System.out.println("4.EXIT");
+            System.out.print("Enter your choice:");
+            int x = scanner.nextInt();
+            scanner.nextLine();
+            if (x==1){
+                admin.menuManagement(scanner,menu,PendingOrders);
+            }
+            else if (x==2){
+                admin.OrderManagement(scanner,AllOrders,PendingOrders);
+            }
+            else if (x==3){
+                admin.reportGenerator();
+            }
+            else if (x==4){
+                running = false;
+            }
+            else{
+                System.out.println("Invalid choice");
             }
         }
     }

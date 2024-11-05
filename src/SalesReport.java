@@ -34,16 +34,19 @@ public class SalesReport {
     public void refundBack(Order order){
         OrdersCancelled++;
         OrdersSold--;
+        if  (OrdersSold < 0){OrdersSold = 0;}
         for (Map.Entry<FoodItem, Integer> entry : order.getOrder().entrySet()) {
             FoodItem item = entry.getKey();
             Integer quantity = entry.getValue();
             refunded += item.getPrice()*quantity;
         }
+        System.out.println("THE AMOUNT HAS BEEN REFUNDED BACK!!");
     }
     // Method to generate and display the report
     public void generateReport() {
         System.out.println("Daily Sales Report:");
         System.out.println("Total Sales: $" + totalSales);
+        System.out.println("Total Refunded back: $" + refunded);
         System.out.println("Total Orders sold: " + OrdersSold);
         System.out.println("Total Orders cancelled: " + OrdersCancelled);
         System.out.println("Most Popular Items:");

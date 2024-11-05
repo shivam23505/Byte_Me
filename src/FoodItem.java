@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class FoodItem {
@@ -6,6 +8,7 @@ public class FoodItem {
     private String category;
     private double price;
     private int quantity;
+    private List<String> Reviews;
 
     public FoodItem(int id, String name, String category, double price, int quantity) {
         this.id = id;
@@ -13,7 +16,17 @@ public class FoodItem {
         this.category = category;
         this.price = price;
         this.quantity = quantity;
+        Reviews = new ArrayList<String>();
     }
+
+    public List<String> getReviews() {
+        return Reviews;
+    }
+
+    public void setReviews(List<String> reviews) {
+        Reviews = reviews;
+    }
+
     public int getId() {
         return id;
     }
@@ -61,6 +74,7 @@ public class FoodItem {
                 double newPrice = scanner.nextDouble();
                 scanner.nextLine();
                 setPrice(newPrice);
+                running = false;
             }
             else if (choice == 2){
                 System.out.print("Enter the new quantity:");
@@ -98,6 +112,15 @@ public class FoodItem {
     @Override
     public String toString() {
         return id + ": " + name + " (" + category + ") - $" + price + (getQuantity()>0 ? " [Available]" : " [Unavailable]");
+    }
+    public void addComment(String comment){
+        Reviews.add(comment);
+    }
+    public void viewMyReview(){
+        System.out.println("Reviews for " + getName()+":");
+        for (String comment:getReviews()){
+            System.out.println("--" + comment);
+        }
     }
 
 }

@@ -36,7 +36,12 @@ public class Order implements Comparable<Order> {
         this.CustomerType = CustomerType;
     }
     public Order(Order other){
-        this.order = other.getOrder();
+        this.order = new HashMap<>();
+        for (Map.Entry<FoodItem, Integer> entry : other.getOrder().entrySet()) {
+            FoodItem item = entry.getKey();
+            FoodItem copiedItem = new FoodItem(item.getId(),item.getName(),item.getCategory(),item.getPrice(),item.getQuantity());
+            this.order.put(copiedItem, entry.getValue());
+        }
         this.OrderId = other.getOrderId();
         this.CustomerID = other.getCustomerID();
         this.CustomerType = other.getCustomerType();
@@ -125,7 +130,7 @@ public class Order implements Comparable<Order> {
     }
     @Override
     public String toString() {
-        return getOrderId()+ "("+getCustomerType() + " ORDER) Status:" + getStatus();
+        return getOrderId()+ "("+getCustomerType()+ " ORDER) Status:" + getStatus();
     }
 
     @Override
@@ -136,9 +141,9 @@ public class Order implements Comparable<Order> {
     }
 
     public void OrderDetails(){
-        for (FoodItem item : getOrder().keySet()) {
-            System.out.println("ItemId:" + item.getId() + "\tItem:" + item.getName() + "\tQuantity:" + getOrder().get(item));
+//        System.out.println("ORDER DETAILS CALLED");
+        for (FoodItem item : order.keySet()) {
+            System.out.println("ItemId:" + item.getId() + "\tItem:" + item.getName() + "\tQuantity:" + order.get(item) + "\tPrice" + item.getPrice());
         }
     }
-
 }
