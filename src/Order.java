@@ -139,7 +139,7 @@ public class Order implements Comparable<Order> {
         if (!this.getCustomerType().equals("VIP") && other.getCustomerType().equals("VIP")) return 1;
         return Integer.compare(this.getOrderId(), other.getOrderId()); // Otherwise, compare by orderId
     }
-
+    
     public void OrderDetails(){
 //        System.out.println("ORDER DETAILS CALLED");
         for (FoodItem item : order.keySet()) {

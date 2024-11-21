@@ -1,5 +1,6 @@
 import com.sun.source.tree.Tree;
 
+import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Scanner;
@@ -99,7 +100,7 @@ public class CustomerLogin {
                 customer.OrderTracking(scanner,CancelledOrders,PendingOrder);
             }
             else if (choice == 4) {
-                customer.ObtainMembership(scanner);
+                customer.ObtainMembership(scanner, PendingOrder);
             }
             else if (choice == 5) {
                 customer.giveComment(scanner,Menu);

@@ -169,7 +169,7 @@ public class Customer extends User{
     public void PLACE_ORDER(Scanner scanner,TreeSet<FoodItem>menu,List<Order>AllOrders,List<Customer>AllCustomers,PriorityQueue<Order>PendingOrder){
         getMyCart().CartOperations(scanner,menu,AllOrders,AllCustomers,PendingOrder);
     }
-    public void ObtainMembership(Scanner scanner){
+    public void ObtainMembership(Scanner scanner,PriorityQueue<Order>pendingOrders){
         if (getVIP()){
             System.out.println("YOU ARE ALREADY A VIP MEMBER!!");
             return;
@@ -186,7 +186,7 @@ public class Customer extends User{
             if (choice == 1){
                 System.out.println("CONGRATULATIONS!! YOU ARE NOW A VIP MEMBER!!");
                 setVIP(true);
-
+                changePriority(pendingOrders);
                 running = false;
             }
             else if (choice == 2){
@@ -194,6 +194,23 @@ public class Customer extends User{
             }
             else{
                 System.out.println("INVALID INPUT!!");
+            }
+        }
+    }
+    public void changePriority(PriorityQueue<Order>PendingOrder){
+        for (Order order:getMyOrders()){
+            Iterator<Order>iterator = PendingOrder.iterator();
+            Order curr = null;
+            while (iterator.hasNext()){
+                curr = iterator.next();
+                if (curr.getOrderId() == order.getOrderId()){
+                    iterator.remove();
+                    break;
+                }
+            }
+            if (curr!=null){
+                curr.setCustomerType("VIP");
+                PendingOrder.add(curr);
             }
         }
     }
