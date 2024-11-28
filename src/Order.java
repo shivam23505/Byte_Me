@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 /*
@@ -9,7 +11,8 @@ import java.util.Map;
     DENIED
     CANCELED
  */
-public class Order implements Comparable<Order> {
+public class Order implements Comparable<Order>{
+
     private int OrderId;
     private Map<FoodItem,Integer>order;
     private int CustomerID;

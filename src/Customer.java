@@ -1,5 +1,6 @@
 import jdk.jfr.Category;
 
+import java.io.*;
 import java.util.*;
 
 public class Customer extends User{
@@ -50,6 +51,7 @@ public class Customer extends User{
         return MyCart == null;
     }
     public void BrowseMenu(Scanner scanner, TreeSet<FoodItem> Menu){
+//        loadMyOrders();
         boolean running = true;
         while(running){
             System.out.println("-------------------------");
@@ -349,4 +351,75 @@ public class Customer extends User{
         System.out.println("VISIT US AGAIN!!");
         System.out.println("Customer "+getName()+" has logged out.");
     }
+
+    public void loadMyOrders() {
+        String fileName = getEmail() + ".txt"; // File name based on the customer email
+        File file = new File("src",fileName);
+
+        // Check if the file exists
+        if (!file.exists()) {
+    //            System.out.println("No orders found for this customer.");
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            // Read the file line by line
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                // Extract order details
+                int orderId = Integer.parseInt(data[0]); // First value is OrderId
+                Map<FoodItem,Integer> foodItems = new HashMap<>();
+                String status = data[data.length - 1]; // Last value is order status
+
+                for (int i = 1; i < data.length - 1; i += 2) { // Skip every 2 columns (fId, fQuantity)
+                    int foodId = Integer.parseInt(data[i]);
+                    int foodQuantity = Integer.parseInt(data[i + 1]);
+                    FoodItem foodItem = searchItem(foodId);
+                    if (foodItem == null) {
+                        continue;
+                    }
+                    foodItems.put(foodItem, foodQuantity);
+                }
+                Order order = new Order(orderId, foodItems, getCustomerID(),(getVIP()?"VIP":"REGULAR"),null,status,null);
+                Main.AllOrders.add(order);
+                Main.pendingOrders.add(order);
+                addOrder(order);
+            }
+            System.out.println("Orders loaded successfully.");
+        } catch (IOException e) {
+            System.out.println("Error reading the file: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error parsing number: " + e.getMessage());
+        }
+    }
+    public static FoodItem searchItem(int foodId) {
+        for (FoodItem item:Main.Menu){
+            if (item.getId() == foodId){return item;}
+        }
+        return null;
+    }
+
+    public void saveMyOrders() {
+        String customerFileName = getEmail() + ".txt";
+        File customerFile = new File("src", customerFileName);
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(customerFile, false))) {
+            for (Order curr_order : getMyOrders()) {
+                int ID = curr_order.getOrderId();
+                String status = curr_order.getStatus();
+                StringBuilder line = new StringBuilder(String.valueOf(ID));
+                for (Map.Entry<FoodItem, Integer> entry : curr_order.getOrder().entrySet()) {
+                    line.append(",").append(entry.getKey().getId()).append(",").append(entry.getValue());
+                }
+                line.append(",").append(status);
+                bw.write(line.toString());
+                bw.newLine();
+            }
+//            System.out.println("Orders saved successfully to " + customerFileName);
+        } catch (IOException e) {
+            System.out.println("Error writing to " + customerFileName + ": " + e.getMessage());
+        }
+    }
+
+
 }

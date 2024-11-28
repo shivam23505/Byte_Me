@@ -92,6 +92,7 @@ public class AdminLogin {
                 admin.reportGenerator();
             }
             else if (x==4){
+                Admin.saveMenu();
                 running = false;
             }
             else{

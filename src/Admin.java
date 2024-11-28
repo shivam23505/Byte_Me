@@ -1,6 +1,10 @@
 import com.sun.source.tree.Tree;
 
 import javax.swing.plaf.IconUIResource;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Admin extends User{
@@ -287,5 +291,23 @@ public class Admin extends User{
     }
     public void reportGenerator(){
         salesReport.generateReport();
+    }
+
+    public static void saveMenu() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("menu.txt", false))) { // Overwrite the file
+            for (FoodItem item : Main.Menu) {
+                String line = String.format("%d,%s,%s,%.2f,%d",
+                        item.getId(),
+                        item.getName(),
+                        item.getCategory(),
+                        item.getPrice(),
+                        item.getQuantity());
+                bw.write(line);
+                bw.newLine();
+            }
+//            System.out.println("Menu saved successfully to menu.txt");
+        } catch (IOException e) {
+            System.out.println("Error writing to menu.txt: " + e.getMessage());
+        }
     }
 }
