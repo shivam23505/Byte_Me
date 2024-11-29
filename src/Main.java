@@ -18,6 +18,7 @@ public class Main {
     public static void main(String[] args) throws InvalidLoginException{
         RetrieveMenu();
         RetrieveCustomers();
+        viewMenu();
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
         while (running) {
@@ -110,5 +111,15 @@ public class Main {
             System.out.println("Error reading menu file: " + e.getMessage());
         }
     }
+    public static void viewMenu() {
+        // Launch GUI in a new thread
+        // Start the MenuPage GUI
+        Thread guiThread = new Thread(MenuPage::new);
+        guiThread.setDaemon(true); // Ensure the thread doesn't prevent JVM shutdown
+        guiThread.start();
 
+        // CLI program continues running here
+//        System.out.println("Menu GUI loaded. Continue with your CLI tasks.");
+        // Additional CLI logic...
+    }
 }

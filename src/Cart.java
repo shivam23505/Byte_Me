@@ -98,8 +98,29 @@ public class Cart {
         curr_order.setOrderId(newOrderID);
 //        curr_order.setStatus("RECEIVED");
         System.out.println("Item Successfully Added!!");
-
     }
+    public String addItem(int itemId, int quantity, TreeSet<FoodItem>Menu, Order currOrder, int newOrderID) {
+//        FoodItem currItem = Menu.stream().filter(item -> item.getId() == itemId).findFirst().orElse(null);
+        FoodItem currItem = null;
+        for (FoodItem item:Menu){
+            if (item.getId() == itemId){
+                currItem = item;
+                break;
+            }
+        }
+        if (currItem == null) {
+            return "Invalid ID! Item not found!";
+        }
+
+        if (quantity > currItem.getQuantity()) {
+            return "Quantity exceeds current availability! Please reduce the quantity.";
+        }
+        currItem.setQuantity(currItem.getQuantity() - quantity);
+        currOrder.addItemInOrder(currItem, quantity);
+        currOrder.setOrderId(newOrderID);
+        return "Item successfully added!";
+    }
+
     public void removeItem(Scanner scanner,  TreeSet<FoodItem>menu) {
         System.out.print("ENTER THE ITEM ID TO REMOVE:");
         FoodItem curr_item = checkFunc(scanner, menu);

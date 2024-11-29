@@ -1,5 +1,3 @@
-package gui;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -9,34 +7,38 @@ public class OrdersPage {
     JButton backButton;
 
     public OrdersPage() {
-        frame = new JFrame("Orders");
-
-        // Table setup
+        frame = new JFrame("PENDING ORDERS");
         String[] columns = {"Order Number", "Items Ordered", "Status"};
-        Object[][] data = {
-                {"#101", "Burger, Fries", "Preparing"},
-                {"#102", "Pizza", "Out for Delivery"},
-        };
 
+
+        Object[][] data = new Object[Main.AllOrders.size()][3];
+        int i = 0;
+        for (Order order : Main.AllOrders) {
+            data[i][0] = order.getOrderId();
+            data[i][1] = order.getOrder().size();
+            data[i][2] = order.getStatus();
+            i++;
+        }
         ordersTable = new JTable(new DefaultTableModel(data, columns));
         JScrollPane scrollPane = new JScrollPane(ordersTable);
 
-        // Back button
         backButton = new JButton("Back to Menu");
         backButton.addActionListener(e -> {
-            // Navigate back to menu page
             frame.dispose();
-            new MenuPage(); // Navigate back to MenuPage
+            new MenuPage();
         });
 
-        // Layout setup
         JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Use vertical layout
         panel.add(scrollPane);
         panel.add(backButton);
 
         frame.add(panel);
-        frame.setSize(400, 300);
+        frame.setSize(500, 400); // Adjust size for better table visibility
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+    }
+    public static void main(String[] args) {
+        new OrdersPage();
     }
 }
