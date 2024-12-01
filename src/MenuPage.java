@@ -9,17 +9,15 @@ public class MenuPage {
     public MenuPage() {
         frame = new JFrame("Menu");
 
-        // Table setup
         String[] columns = {"Item Id","Item Name", "Price", "Quantity Available"};
 
-        // Assuming Main.Menu is a List<FoodItem>
-        Object[][] data = new Object[Main.Menu.size()][4]; // Dynamically allocate based on the number of items
+        Object[][] data = new Object[Main.Menu.size()][4];
         int i = 0;
         for (FoodItem item : Main.Menu) {
             data[i][0] = item.getId();
-            data[i][1] = item.getName(); // Item name
-            data[i][2] = item.getPrice(); // Item price
-            data[i][3] = item.getQuantity(); // Item quantity
+            data[i][1] = item.getName();
+            data[i][2] = item.getPrice();
+            data[i][3] = item.getQuantity();
             i++;
         }
         DefaultTableModel tableModel = new DefaultTableModel(data, columns);
@@ -29,19 +27,17 @@ public class MenuPage {
         // Navigation button
         viewOrdersButton = new JButton("View Orders");
         viewOrdersButton.addActionListener(e -> {
-            // Navigate to orders page
             frame.dispose();
-            new OrdersPage(); // Assuming you have an OrdersPage class
+            new OrdersPage();
         });
 
-        // Layout setup
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Use vertical layout
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(scrollPane);
         panel.add(viewOrdersButton);
 
         frame.add(panel);
-        frame.setSize(500, 400); // Adjust size for better table visibility
+        frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }

@@ -10,7 +10,6 @@ public class OrdersPage {
         frame = new JFrame("PENDING ORDERS");
         String[] columns = {"Order Number", "Items Ordered", "Status"};
 
-
         Object[][] data = new Object[Main.AllOrders.size()][3];
         int i = 0;
         for (Order order : Main.AllOrders) {
@@ -29,12 +28,12 @@ public class OrdersPage {
         });
 
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Use vertical layout
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(scrollPane);
         panel.add(backButton);
 
         frame.add(panel);
-        frame.setSize(500, 400); // Adjust size for better table visibility
+        frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
